@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"hallgo/src/consulta"
 	"hallgo/src/dirscan"
 	"hallgo/src/paramscan"
 	"hallgo/src/portscan"
+	"hallgo/src/webcrawler"
 	"os"
 	"os/exec"
 
@@ -24,7 +26,7 @@ func verify() {
 		fmt.Scanln(&resp)
 		switch resp {
 		case "s":
-			main()
+			Main()
 		case "n":
 			green.Println(logo)
 			green.Println(diz)
@@ -63,6 +65,8 @@ var menu = `MENU:
 1- PortScan
 2- DirScan
 3- ParamScan
+4- WebCrawler
+5- Consultar Dados
 99 - Sair
 `
 var logo = `██╗  ██╗ █████╗ ██╗     ██╗     
@@ -77,7 +81,7 @@ var logo = `██╗  ██╗ █████╗ ██╗     ██╗
 var red = cl.New(cl.FgRed, cl.Bold)
 var green = cl.New(cl.FgHiGreen, cl.Bold)
 
-func main() {
+func Main() {
 	clearTerminal()
 	var op int
 	red.Println(logo)
@@ -98,6 +102,15 @@ func main() {
 		clearTerminal()
 		paramscan.ParamScan()
 		verify()
+	case 4:
+		clearTerminal()
+		webcrawler.Crawler()
+		verify()
+	case 5:
+		clearTerminal()
+		consulta.MenuConsulta()
+		Main()
+		
 	case 99:
 		clearTerminal()
 		green.Println(logo,diz,ate)
@@ -105,6 +118,9 @@ func main() {
 		
 		
 	default:
-		main()
+		Main()
 	}
+}
+func main()  {
+	Main()
 }
