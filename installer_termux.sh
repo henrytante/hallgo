@@ -5,6 +5,6 @@ if ! command -v go &> /dev/null; then
     pkg install golang
 fi
 go build -o hall
-sudo cp hall /data/data/com.termux/files/usr/bin
+cp hall /data/data/com.termux/files/usr/bin
 clear
 echo 'Hall foi instalado com sucesso. Execute com o comando "hall"'
