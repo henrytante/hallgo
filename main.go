@@ -3,9 +3,11 @@ package main
 import (
 	"fmt"
 	"hallgo/src/dirscan"
+	"hallgo/src/paramscan"
 	"hallgo/src/portscan"
 	"os"
 	"os/exec"
+
 	cl "github.com/fatih/color"
 )
 
@@ -60,6 +62,7 @@ var diz = ` ____  ____  ____
 var menu = `MENU:
 1- PortScan
 2- DirScan
+3- ParamScan
 99 - Sair
 `
 var logo = `██╗  ██╗ █████╗ ██╗     ██╗     
@@ -72,7 +75,7 @@ var logo = `██╗  ██╗ █████╗ ██╗     ██╗
 
 `
 var red = cl.New(cl.FgRed, cl.Bold)
-
+var green = cl.New(cl.FgHiGreen, cl.Bold)
 
 func main() {
 	clearTerminal()
@@ -91,7 +94,15 @@ func main() {
 		clearTerminal()
 		dirscan.DirScan()
 		verify()
-	
+	case 3:
+		clearTerminal()
+		paramscan.ParamScan()
+		verify()
+	case 99:
+		clearTerminal()
+		green.Println(logo,diz,ate)
+		return
+		
 	default:
 		main()
 	}
