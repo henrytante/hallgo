@@ -26,9 +26,9 @@ func verify() {
 		case "s":
 			main()
 		case "n":
-			red.Println(logo)
-			red.Println(diz)
-			red.Println(ate)
+			green.Println(logo)
+			green.Println(diz)
+			green.Println(ate)
 			return
 		default:
 			fmt.Printf("%s não é uma opção valida\n", resp)
@@ -88,7 +88,7 @@ func main() {
 	switch op {
 	case 1:
 		clearTerminal()
-		portscan.Scan()
+		portscan.Port()
 		verify()
 	case 2:
 		clearTerminal()
@@ -102,6 +102,7 @@ func main() {
 		clearTerminal()
 		green.Println(logo,diz,ate)
 		return
+		
 		
 	default:
 		main()
