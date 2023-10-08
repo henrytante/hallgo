@@ -1,4 +1,14 @@
 para instalar meu menu tudo em hall (hall é um trocadilho da primeira letra do meu nome e all de tudo).
+
+LINUX()
+
 de permissão ao instalador: chmod +x installer.sh
 depois de o seguinte comando: sudo ./installer.sh
+se não houver erro você ja pode dar o comando "hall" no seu terminal
+
+
+TERMUX()
+
+de permissão ao instalador: chmod +x installer_termux.sh
+depois de o seguinte comando: ./installer_termux.sh
 se não houver erro você ja pode dar o comando "hall" no seu terminal
