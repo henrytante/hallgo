@@ -1,101 +1,60 @@
 package portscan
 
 import (
-	"fmt"
-	"net"
-	"strconv"
-	"strings"
-	cl "github.com/fatih/color"
-	"sync"
-	"time"
+    "context"
+    "fmt"
+    "log"
+    "time"
+
+    "github.com/Ullaakut/nmap/v3"
+    "github.com/fatih/color"
 )
-
+var red = color.New(color.FgHiRed, color.Bold)
 func Port() {
-	var host string
-	red := cl.New(cl.FgRed, cl.Bold)
-	green := cl.New(cl.FgHiGreen, cl.Bold)
-	yellow := cl.New(cl.FgHiYellow, cl.Bold)
-	red.Print("Digite seu host: ")
-	fmt.Scanln(&host)
-	target := host
+    var url string
+	
+    red.Print("Digite o host: ")
+    fmt.Scanln(&url)
+    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
+    defer cancel()
 
-	// Defina as portas a serem verificadas
-	portsStr := "80,443,22,3306,1433,5432,6379,25,110,143,993,995,53,161,162,5900"
-	ports := parsePorts(portsStr)
+    scanner, err := nmap.NewScanner(
+        ctx,
+        nmap.WithTargets(url),
+        nmap.WithPorts("80,443,22,3306,1433,5432,6379,25,110,143,993,995,53,161,162,5900"),
+    )
+    if err != nil {
+        log.Fatalf("unable to create nmap scanner: %v", err)
+    }
 
-	red.Printf("\nIniciando varredura em %s...\n\n", target)
+    result, warnings, err := scanner.Run()
+    if len(*warnings) > 0 {
+        log.Printf("run finished with warnings: %s\n", *warnings)
+    }
+    if err != nil {
+        log.Fatalf("unable to run nmap scan: %v", err)
+    }
 
-	var wg sync.WaitGroup
-	openPorts := make(chan int)
+    green := color.New(color.FgGreen).SprintFunc()
+    red := color.New(color.FgHiRed,color.Bold).SprintFunc()
 
-	for _, port := range ports {
-		wg.Add(1)
-		go func(p int) {
-			defer wg.Done()
-			address := fmt.Sprintf("%s:%d", target, p)
-			conn, err := net.DialTimeout("tcp", address, 2*time.Second)
-			if err == nil {
-				defer conn.Close()
-				openPorts <- p
-			}
-		}(port)
-	}
+    for _, host := range result.Hosts {
+        if len(host.Ports) == 0 || len(host.Addresses) == 0 {
+            continue
+        }
 
-	go func() {
-		wg.Wait()
-		close(openPorts)
-	}()
+        fmt.Printf("Host %q:\n", host.Addresses[0])
 
-	var openPortList []int
-	for port := range openPorts {
-		openPortList = append(openPortList, port)
-	}
+        for _, port := range host.Ports {
+            var portStatus string
+            if portStatus == "open" {
+                portStatus = green(port.State)
+            } else {
+                portStatus = red(port.State)
+            }
+            fmt.Printf("\tPort %d/%s %s %s\n", port.ID, port.Protocol, portStatus, port.Service.Name)
+        }
+    }
 
-	yellow.Println("Portas abertas:\n")
-	for _, port := range openPortList {
-		serviceName := getServiceName(port)
-		green.Printf("Porta %d aberta - Serviço: %s\n", port, serviceName)
-	}
-}
-
-func parsePorts(portStr string) []int {
-	portList := strings.Split(portStr, ",")
-	var ports []int
-
-	for _, port := range portList {
-		p, err := strconv.Atoi(port)
-		if err == nil {
-			ports = append(ports, p)
-		}
-	}
-
-	return ports
-}
-
-func getServiceName(port int) string {
-	serviceMap := map[int]string{
-		22:    "SSH",
-		25:    "SMTP",
-		53:    "DNS",
-		80:    "HTTP",
-		110:   "POP3",
-		143:   "IMAP",
-		161:   "SNMP",
-		162:   "SNMP-TRAP",
-		443:   "HTTPS",
-		5900:  "VNC",
-		6379:  "Redis",
-		993:   "IMAPS",
-		995:   "POP3S",
-		1433:  "MSSQL",
-		3306:  "MySQL",
-		5432:  "PostgreSQL",
-		// Adicione mais serviços e portas aqui conforme necessário
-	}
-
-	if serviceName, ok := serviceMap[port]; ok {
-		return serviceName
-	}
-
-	return "Desconhecido"
+    fmt.Printf("Nmap done: %d hosts up scanned in %.2f seconds\n", len(result.Hosts), result.Stats.Finished.Elapsed)
 }
